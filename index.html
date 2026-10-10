@@ -263,7 +263,6 @@
 
 <script>
 const SITES=[
-{n:"Wolds View Touring Park",hard:1,pub:"The White Hart, Caistor · ~15 min walk · serves food",loc:"Caistor, Lincolnshire — ~25 min",motorhome:1,campervan:1,adults:1,near:1,standout:1, d:"Family-run adults-only touring park on the edge of the Lincolnshire Wolds with immaculate landscaped pitches, underfloor-heated shower block and an on-site cafe; 60 pitches but consistently praised as peaceful and very well kept.", f:[["Pitches","60 landscaped pitches, touring park"],["Facilities","<span class='ok'>Underfloor-heated shower block</span>, immaculate"]], r:"10/10 (96) ukcampsite",p:"~£25/night (indicative)",w:"No campfires allowed; 60 pitches so not tiny — but adults-only keeps it quiet",},
 {n:"Mount Pleasant Glamping and Camping",pub:"None confirmed within a 30-min walk",loc:"Stanton Dale, Ashbourne, Derbyshire — ~1h30",motorhome:1,campervan:1,campfire:1,standout:1, d:"Delightfully quirky working-farm campsite on the Peak District edge with an on-site machinery museum, donkeys, pigs and chickens, fire pits for hire and big sunset views; 15 grass pitches for tents, campervans and motorhomes.", f:[["Pitches","15 grass pitches, tents + campervans"],["Facilities","Good toilet facilities; showers tokened (£1/6 min)"]], r:"9/10 (20) ukcampsite; 4.9/5 Tripadvisor",p:"~£15/2 adults campervan (2022 review); shower tokens £1/6 min",w:"No dogs allowed (working farm livestock); showers tokened (£1/6 min); exposed hilltop can be windy; limited shower provision when busy",},
 {n:"The Cud Life",hard:1,pub:"The Knox · 25 min walk · serves food",loc:"Killinghall, nr Harrogate, North Yorkshire — ~1h20",motorhome:1,campervan:1,standout:1, d:"A quirky 16-pitch working-farm campsite just outside Harrogate with an on-site cook shop and café, roaming chickens, a strict 10:30pm lights-out curfew and farmland views — 'The Good Life but on a farm'.", f:[["Pitches","16 pitches, grass + hardstanding"],["Facilities","Unisex shower pods, spotlessly clean"]], r:"10/10 (348) ukcampsite",p:"from ~£20/night (indicative)",w:"Older forum reports (2019) of winter shower closures; current listings (ukcampsite, campsites.co.uk, pitchup) show hot showers year-round — confirm before a winter booking",},
 {n:"Marbury Camp and Lodge",hard:1,pub:"None confirmed within a 30-min walk",loc:"Marbury, Whitchurch, Cheshire — ~1h50",motorhome:1,campervan:1,campfire:1,standout:1, d:"Small, genuinely quirky camping field on the former Duchy of Lancaster Estate near Combermere Abbey — 20 pitches with fire-pit hire, Saturday-night pizzas, secure dog field and cycle hire on site.", f:[["Pitches","20 pitches, fire-pit hire"],["Facilities","Heated shower block, fantastic facilities"]], r:"9/10 (4) ukcampsite; pitchup 54 reviews",p:"from £17.50/night (pitchup)",w:"Tent field is on a gradient — arrive early for a flat pitch; fire pits for hire only (one reviewer reported £25); 9pm quiet time inconsistently enforced",},
@@ -294,69 +293,6 @@ function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;',
 /* Brief-fit scores (0–100) + love/hate, from the October 2026 review research.
    Keyed by site name; sites added after the review round have no entry. */
 const SCORES={
-"Wolds View Touring Park":{score:94,why:"Near-perfect for the brief: all-year, immaculate facilities, adults-only peace, 25min from home; loses points only on no campfires.",
- loves:["“The site is immaculate, with not a stray blade of grass to be seen. The facilities were also spotless - possibly the cleanest of any site we've ever been to” — ukcampsite.co.uk","“The toilets and shower block are spotlessly clean with underfloor heating and piped music” — Tripadvisor"],
- hates:["“There is no lake etc despite advertisements saying there is. Apparently it hasn't been built yet” — Pitchup.com"]},
-"Mount Pleasant Glamping and Camping":{score:92,why:"The quirkiest all-year option in the region: campfires, farm animals, machinery museum, confirmed all-year twice — docked for token showers and wind exposure.",
- loves:["“So quirky and interesting, good facilities, beautiful glamping spaces all individual and created with love” — Tripadvisor","“The campsite is quirky and interesting and one of our favourite campsites... no road noise as it's quite a way from the road” — Tripadvisor","“a quiet, clean site, with fantastic views, good toilet facilities, welcoming and genuine owners, and donkeys!” — ukcampsite.co.uk","“very spacious and have lots of room as it is not overcrowded and packed in unlike these commercial ones” — ukcampsite.co.uk"],
- hates:["“Only one person is allowed into the toilet block at any time” — ukcampsite.co.uk","“clean toilets but basic... only 1 shower and 2 toilets in the mens” — ukcampsite.co.uk","“high winds were a problem due to being on top of a hill, but also gave fantastic views” — ukcampsite.co.uk"]},
-"The Cud Life":{score:92,why:"Quirkiest pick: 10/10 from 348 reviews, small, peaceful, all-year with hot showers, only ~1h20 away.",
- loves:["“A little gem of a camp site just outside Harrogate” — Tripadvisor","“The showers are excellent and the toilets spotless!” — Google review","“This site is now open all year and we will definitely make a return visit” — Google review","“Mark parked the site van behind us to make a wind break” — Tripadvisor"],
- hates:["“£20 a night for two, could be quite a bit more for a family... I wouldn't be keen” — motorhomefun.co.uk"]},
-"Marbury Camp and Lodge":{score:92,why:"Checks every hard requirement plus campfires, heated shower block and real quirk — the closest to the brief in this region.",
- loves:["“Absolutely brilliant would recommend it to anyone and will definitely be coming back again, very clean very tranquil and very friendly” — campsites.co.uk","“This place is beautiful and would love to come again soon” — campsites.co.uk","“Absolutely amazing place. Fantastic facilities and food, could not ask for more in a campsite” — campsites.co.uk"],
- hates:["“Some of the pitches are slightly slanted... you end up slowly sliding down the hill” — pitchup","“Too many rules and a 9pm curfew is very unreasonable” — pitchup","“kept awake till 3am due to big gatherings which were quite noisy” — pitchup"]},
-"Lundholme Farm":{score:90,why:"Perfect 10/10 from 48, Ingleborough views from a working farm, all-year hardstanding — at the 2h edge but worth it.",
- loves:["“What a little gem of a site! ... site is small ... pitches are all hardstanding and well maintained” — Google review","“toilet block and showers were spotless” — Google review","“Hot, powerful showers and disability access” — Google review","“Lovely owners and great value for money” — Google review"],
- hates:[]},
-"Oak Tree Holiday Park and Fishery":{score:85,why:"All-year adults-only with campfires and lakes at 35min — great brief fit, docked for the conflicting facility reports.",
- loves:["“Pretty sure, quiet and very relaxing. Fishing lakes, friendly people. Lovely staff” — Pitchup.com","“Nice level pitch and nice shower/toilet. Only stayed 1 night but would quite happily stayed longer” — Pitchup.com"],
- hates:["“The toilets and showers were shabby and certainly not clean... portacabin type building” — Google review","“Wi-Fi is limited; electricity costs extra beyond a daily limit” — Pitchup.com"]},
-"The Wolds Camping and Caravan Site":{score:76,why:"Maximum quirk and tiny scale in the heart of the Wolds, but the 7/10 and near-absent reviews make it a leap of faith.",
- loves:["“Stumbled across this place by a happy chance! Lovely place! Amazing views!” — Google reviews","“The perfect place to unwind and enjoy the peace and tranquility. Gaynor is so lovely and accommodating” — Google reviews"],
- hates:[]},
-"The Limes Campsite":{score:90,why:"Ticks everything including campfires and lakeside pitches in a genuinely tiny site; longer drive and thinner review base hold it back slightly.",
- loves:["“So beautifully rural and well kept and a wonderfully peaceful atmosphere – and James and Mark do everything possible to welcome you” — Tripadvisor","“Amazing location, friendly owner and nothing was too much trouble” — Tripadvisor"],
- hates:[]},
-"Turks Head Touring Park":{score:78,why:"Tiny, all-year, adults-only and quirky pub setting — but almost no reviews to verify the on-the-ground experience.",
- loves:["“Site's small size and pub-adjacent position are the standout features” — ukcampsite.co.uk (9/10 average, 5 reviews)"],
- hates:[]},
-"Daphne's Orchard":{score:80,why:"Lovely adults-only all-year retreat but off the Peak District proper and airport noise is a real caveat.",
- loves:["“We loved the vintage style shower/toilets exceptionally clean. We cannot fault Daphne's Orchard” — ukcampsite.co.uk","“The bathrooms are one of the nicest we've used in our 11 years of camping” — daphnesorchard.com reviews","“An absolute hidden gem, peaceful and dog friendly with beautiful toilets and showers” — daphnesorchard.com reviews"],
- hates:["“Only two bathrooms... would benefit from a couple of extra toilet cubicles for busy periods” — ukcampsite.co.uk","“The runway for East Midlands Airport is less than a mile away... noise was quite obtrusive – enough to affect sleep” — ukcampsite.co.uk"]},
-"Eshton Road Caravan Park":{score:78,why:"All-year, canalside, small and friendly with 70 reviews behind it — but dated facilities and no campfires keep the score down.",
- loves:["“toilet block and showers were kept scrupulously clean” — ukcampsite.co.uk","“The owners of this site are so helpful and friendly” — ukcampsite.co.uk","“We could literally feed the swans/ducks from the camper window” — ukcampsite.co.uk"],
- hates:["“facilities were dated, however they were very clean” — ukcampsite.co.uk","“literally at the side of the owners house and within earshot of the road” — ukcampsite.co.uk","“slightly congested site” (statics, tourers and tents mixed) — ukcampsite.co.uk"]},
-"Poplars Farm Site":{score:90,why:"Peaceful adults-only all-year site with fire pits, near-identical opening confirmation on own site and two listings.",
- loves:["“I absolutely loved it! The facilities are spotless” — campsites.co.uk","“The site is very quiet and the views are beautiful” — Google reviews","“Great pitch with lovely views and very reasonable pitch fees, electricity on a meter” — Tripadvisor"],
- hates:["“Found the site a bit ramshackle... old machinery around” — Tripadvisor","“A couple of grab rails would have helped” in the shower/toilet — campsites.co.uk"]},
-"Derbyshire Hills Campsite":{score:88,why:"Smallest, cheapest, most peaceful pick; adults-only and open 1 Jan–31 Dec in both 2026 and 2027.",
- loves:["“A small picturesque adults only site with very clean facilities and very friendly and helpful owners” — ukcampsite.co.uk","“A little piece of peaceful heaven. Absolute bliss!” — ukcampsite.co.uk","“Amazing campsite, brilliant facilities. Small and very friendly... The facilities are spotless” — ukcampsite.co.uk"],
- hates:["“Only one toilet/shower for males” — ukcampsite.co.uk","“A chair or bench and a shelf would have made for quicker dressing and undressing” — ukcampsite.co.uk"]},
-"Cliff Farm Holidays":{score:84,why:"10/10 peaceful NYM farm with genuinely spotless facilities and all-year hardstanding — tents not accepted.",
- loves:["“Great little site - spotlessly clean” — campsites.co.uk","“It's quiet and peaceful... not a huge site” — campsites.co.uk","“Toilet blocks are minted” — campsites.co.uk","“You're met with a happy friendly greeting on arrival” — campsites.co.uk"],
- hates:["“Could do with more taps located around the campsite” — campsites.co.uk","“15 minute walk down a long lane... pitch black at night” (bus stop walk) — campsites.co.uk"]},
-"Beech Croft Farm":{score:82,why:"Superb facilities and 343 reviews, but tent pitches aren't all-year — hardstanding only in winter.",
- loves:["“The toilets and showers at this site are amongst the best we have seen. Spotlessly clean and always warm” — ukcampsite.co.uk","“The whole area is just well set up, the showers, toilets are fabulous” — Tripadvisor","“Beautiful views, clean quiet and a great location” — Tripadvisor"],
- hates:["“The toilets and showers... are in need of a refurbishment and are not big enough at busy times” — ukcampsite.co.uk","“At peak times I imagine two showers maybe an issue” — Tripadvisor"]},
-"Sunny Side Touring Park":{score:78,why:"Lovely facilities and canal-side setting but pub noise risk and campfire ambiguity weaken it for a peaceful camping trip.",
- loves:["“the toilet and shower block is immaculately clean... will definitely be back” — pitchup","“lovely clean toilets/showers. Can't wait to return” — Google reviews","“a little hidden gem between Audlem and Nantwich” — Google reviews"],
- hates:["“Cafe/bar was closed and apparently only opens randomly” — pitchup","“Noisy but that may just have been my visit with music played from 7am to 9pm pretty much” — pitchup","“Showers could be better” — pitchup review summary"]},
-"Blackbrook Lodge Caravan and Campsite":{score:80,why:"Consistently praised for peace and cleanliness — loses points for no campfires and tight gravel pitches.",
- loves:["“The campsite itself is in a gorgeous location, and is incredibly peaceful” — Tripadvisor","“Great facilities, kept lovely and clean... Liked the peaceful location between Belper and Ashbourne” — Tripadvisor"],
- hates:["“The site was mostly hardcore/gravel, not much greenery... Pitches are very close together” — pitchup","“There isn't that much to do nearby unless you drive out a bit... pubs are about an hour's walk away” — Tripadvisor"]},
-"Orcaber Farm Caravan & Camping Park":{score:82,why:"Huge 10/10 review base, fire pits and pizza nights, all-year hardstanding — but winter tenters must use hardstanding.",
- loves:["“The facilities are scrupulously clean” — visittheyorkshiredales.co.uk","“It was the best shower I have EVER had on a campsite!” — campsites.co.uk","“Amazing place with amazing views and amazing people” — campsites.co.uk","“practically perfect in every way” — visittheyorkshiredales.co.uk"],
- hates:["“they burn rubbish in nearby farm buildings and the smell wasn't great” — campsites.co.uk","“missing a trick only offering hot food on a Saturday night” — campsites.co.uk"]},
-"The Wharf Caravan Park":{score:76,why:"Idyllic canal setting but the sewage smell reports and no-campfire rule are real marks against.",
- loves:["“a new toilet/shower facility is beautifully finished and spotless clean and heated too” — ukcampsite.co.uk","“Toilets and showers were spotless... Beautiful location, right next to the canal” — ukcampsite.co.uk"],
- hates:["“the smell of raw sewage that occasionally drifted over” — ukcampsite.co.uk","“the only down side was the septic tank was pretty smelly” — ukcampsite.co.uk","“the entrance is a bit limited... tight corner” noted by two reviewers — ukcampsite.co.uk"]},
-};
-function scorePill(s){
-  const sc=SCORES[s.n];
-  if(!sc)return `<span class="scorePill dim" title="Added after the review round — not yet scored">–</span>`;
-  return `<span class="scorePill" title="Brief-fit score: how well it matches the brief, out of 100">${sc.score}</span>`;
-}
 function loveHate(s){
   const sc=SCORES[s.n];
   if(!sc)return '';
