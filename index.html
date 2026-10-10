@@ -368,6 +368,11 @@ function scene(hue){
   `<polygon points="330,60 340,28 350,60"/><polygon points="344,60 351,40 358,60"/>`+
   `</g></svg></div>`;
 }
+function scorePill(s){
+  const sc=SCORES[s.n];
+  if(!sc)return `<span class="scorePill dim" title="Added after the review round — not yet scored">–</span>`;
+  return `<span class="scorePill" title="Brief-fit score: how well it matches the brief, out of 100">${sc.score}</span>`;
+}
 function card(s,idx){
   const facts=s.f.map(([k,v])=>`<li><b>${k}:</b> ${v}</li>`).join('');
   const hue=205+((idx*47)%55);
