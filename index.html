@@ -215,7 +215,7 @@
 <div class="wrap">
   <section id="poll">
     <h2 class="section"><span class="secNo">01</span>The great campsite vote <span class="n">tap the stars, crown a leader</span></h2>
-    <p class="lede">Everyone scores the sites that appeal to them. Add each person, flip between individual and combined leaderboards, and see which site wins.</p>
+    <p class="lede">Everyone scores the sites that appeal to them — votes sync to the group scoreboard. Add each person, flip between individual and combined leaderboards, and see which site wins.</p>
     <div id="whoBanner" class="caveat" style="display:none"></div>
     <div id="voterBar"></div>
     <div class="lbtabs" id="lbtabs">
@@ -225,13 +225,13 @@
     <p class="lede" id="lbEmpty">Tap the stars on any site below to score it out of five — the leader will be crowned here.</p>
     <div id="leaderboard"></div>
     <div class="pollActions">
-      <button class="chip" id="shareBtn">Copy my scores link</button>
+      
       <button class="chip" id="resetBtn">Reset my scores</button>
     </div>
     <div id="shareBanner" class="caveat" style="display:none;margin-top:12px"></div>
     <details class="how"><summary>How does the scoring work?</summary>
-      <p>Scores live <b>in this browser only</b> — nothing is uploaded anywhere, because the site is just static files on GitHub Pages with no server behind it. Add each person who's choosing (you, Hattie…) with the + button, tap the stars on the sites that appeal to each of you, and the leaderboard crowns the leader — per person, or combined across everyone.</p>
-      <p>To pull in someone's scores from another phone, get them to tap <b>Copy my scores link</b> and open it here: you'll be offered to save their scores alongside yours. That's how the combined board gets built — one shared link at a time.</p>
+      <p>Your scores are saved on <b>this device</b> and sent to the group scoreboard server, so everyone’s votes count together. Add each person who’s choosing with the + button, tap the stars on the sites that appeal to each of you — use one consistent name per person across phones.</p>
+      <p>The <b>Everyone combined</b> board needs the group password (ask Ian) — it shows everyone’s scores together, live. The password is checked by the server and never appears on this page.</p>
     </details>
   </section>
 
@@ -438,11 +438,14 @@ document.getElementById('sortBtn').addEventListener('click',function(){
   }).forEach(c=>grid.appendChild(c));
   apply();
 });
-/* ---------- poll: named voters, per-person + combined leaderboards ---------- */
+/* ---------- poll: named voters, server-synced scores ---------- */
 const PKEY='wildskies_manton_v1';
+const API_BASE='https://wildskies-votes.wildskies-votes.workers.dev';
+const SITE_SLUG='manton';
 let poll={voters:{},current:null};
 try{const raw=JSON.parse(localStorage.getItem(PKEY)||'null');if(raw&&raw.voters)poll=raw;}catch(e){}
 let lbTab='me';
+let serverVotes=null;
 function savePoll(){try{localStorage.setItem(PKEY,JSON.stringify(poll))}catch(e){}}
 function myScores(){return (poll.current&&poll.voters[poll.current])?poll.voters[poll.current]:{};}
 function paintStars(){
@@ -452,6 +455,35 @@ function paintStars(){
     row.querySelectorAll('.star').forEach(st=>st.classList.toggle('lit',+st.dataset.v<=v));
   });
 }
+/* ---- server sync (fire-and-forget; local copy is the source of truth on this device) ---- */
+function apiVote(idx,score){
+  if(!poll.current)return;
+  fetch(API_BASE+'/api/vote',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({site:SITE_SLUG,voter:poll.current,idx:+idx,score:+score})}).catch(()=>{});
+}
+function apiReset(){
+  if(!poll.current)return;
+  fetch(API_BASE+'/api/reset',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({site:SITE_SLUG,voter:poll.current})}).catch(()=>{});
+}
+async function fetchCombined(){
+  let pw=null;
+  try{pw=sessionStorage.getItem('ws_pw')}catch(e){}
+  if(!pw){
+    pw=prompt('Group password for the combined leaderboard (ask Ian):');
+    if(!pw||!pw.trim())return 'cancelled';
+    pw=pw.trim();
+  }
+  let r;
+  try{r=await fetch(API_BASE+'/api/results?site='+encodeURIComponent(SITE_SLUG),{headers:{'x-password':pw}});}
+  catch(e){return 'error';}
+  if(r.status===401){try{sessionStorage.removeItem('ws_pw')}catch(e){} return 'wrong';}
+  if(!r.ok)return 'error';
+  try{sessionStorage.setItem('ws_pw',pw)}catch(e){}
+  try{const d=await r.json(); serverVotes=d.votes||[];}
+  catch(e){serverVotes=[];}
+  return 'ok';
+}
 function boardRows(){
   if(lbTab==='me'){
     const ms=myScores();
@@ -459,24 +491,36 @@ function boardRows(){
       .sort((a,b)=>b.v-a.v||((b.s.standout?1:0)-(a.s.standout?1:0))||a.i-b.i)
       .map(x=>({...x,label:'★'.repeat(x.v)+'☆'.repeat(5-x.v)}));
   }
-  const rows=SITES.map((s,i)=>{
-    const votes=Object.keys(poll.voters).map(n=>poll.voters[n][i]).filter(v=>v>0);
-    if(!votes.length)return null;
-    return {s,i,v:votes.reduce((a,b)=>a+b,0)/votes.length,nv:votes.length,
-      label:'★ '+(votes.reduce((a,b)=>a+b,0)/votes.length).toFixed(1)+' · '+votes.length+(votes.length===1?' vote':' votes')};
+  if(!serverVotes)return [];
+  const byIdx={};
+  serverVotes.forEach(v=>{(byIdx[v.idx]=byIdx[v.idx]||[]).push(v.score);});
+  return Object.keys(byIdx).map(k=>{
+    const i=+k, vs=byIdx[k], s=SITES[i];
+    if(!s)return null;
+    const avg=vs.reduce((a,b)=>a+b,0)/vs.length;
+    return {s,i,v:avg,nv:vs.length,
+      label:'★ '+avg.toFixed(1)+' · '+vs.length+(vs.length===1?' vote':' votes')};
   }).filter(Boolean).sort((a,b)=>b.v-a.v||b.nv-a.nv||((b.s.standout?1:0)-(a.s.standout?1:0))||a.i-b.i);
-  return rows;
 }
+let boardMsg='';
 function renderBoard(){
   const rows=boardRows(), lb=document.getElementById('leaderboard'), empty=document.getElementById('lbEmpty');
   document.querySelectorAll('#grid .card').forEach(c=>c.classList.remove('isLeader'));
   const names=Object.keys(poll.voters);
+  if(lbTab==='all'&&!serverVotes){
+    lb.innerHTML='';
+    empty.style.display='';
+    empty.textContent = boardMsg || 'Loading the combined leaderboard…';
+    return;
+  }
   if(!rows.length){
     lb.innerHTML='';
     empty.style.display='';
-    empty.textContent = names.length
-      ? 'Tap the stars on any site below to score it out of five — the leader will be crowned here.'
-      : 'Add your name above, then tap the stars on any site to score it out of five.';
+    empty.textContent = lbTab==='me'
+      ? (names.length
+        ? 'Tap the stars on any site below to score it out of five — the leader will be crowned here.'
+        : 'Add your name above, then tap the stars on any site to score it out of five.')
+      : 'No scores yet — be the first to tap some stars.';
     return;
   }
   empty.style.display='none';
@@ -519,54 +563,37 @@ function syncTabs(){
   const me=document.querySelector('#lbtabs [data-tab="me"]');
   me.textContent = poll.current ? poll.current+'’s leaderboard' : 'My leaderboard';
 }
-document.querySelectorAll('#lbtabs .chip').forEach(t=>t.addEventListener('click',()=>{
-  lbTab=t.dataset.tab; syncTabs(); renderBoard();
+document.querySelectorAll('#lbtabs .chip').forEach(t=>t.addEventListener('click',async ()=>{
+  lbTab=t.dataset.tab; syncTabs();
+  if(lbTab==='all'&&!serverVotes){
+    boardMsg='Loading the combined leaderboard…'; renderBoard();
+    const st=await fetchCombined();
+    boardMsg = st==='wrong' ? 'Wrong password — tap “Everyone combined” to try again.'
+      : st==='cancelled' ? 'Password needed for the combined board — tap “Everyone combined” to try again.'
+      : st==='error' ? 'Couldn’t reach the scoreboard server — check your connection and try again.'
+      : '';
+    renderBoard();
+  } else renderBoard();
 }));
 document.getElementById('grid').addEventListener('click',e=>{
   const st=e.target.closest('.star'); if(!st)return;
   if(!poll.current){flash('Add your name first (above), then score away.');return;}
   const i=st.parentElement.dataset.i, v=+st.dataset.v, ms=myScores();
-  if(ms[i]===v){delete ms[i]}else{ms[i]=v}
+  if(ms[i]===v){delete ms[i]; apiVote(i,0);}else{ms[i]=v; apiVote(i,v);}
   savePoll(); paintStars(); renderBoard();
 });
 document.getElementById('resetBtn').addEventListener('click',()=>{
   if(!poll.current)return;
-  poll.voters[poll.current]={}; savePoll(); paintStars(); renderBoard();
+  poll.voters[poll.current]={}; savePoll(); apiReset(); paintStars(); renderBoard();
   flash('Scores cleared for '+poll.current+'.');
-});
-document.getElementById('shareBtn').addEventListener('click',()=>{
-  if(!poll.current){flash('Add your name first (above).');return;}
-  const ms=myScores(), ks=Object.keys(ms);
-  if(!ks.length){flash('Score a few sites first, then copy the link.');return;}
-  const url=location.href.split('#')[0]+'#v='+encodeURIComponent(poll.current)+'&s='+ks.map(k=>k+':'+ms[k]).join(',');
-  const done=()=>flash('Scores link copied — send it over and they can save your scores alongside theirs.');
-  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(done).catch(()=>{prompt('Copy your scores link:',url)})}
-  else{prompt('Copy your scores link:',url)}
 });
 function flash(msg){
   const b=document.getElementById('shareBanner');
   b.style.display=''; b.textContent=msg;
   setTimeout(()=>{if(!b.dataset.keep)b.style.display='none'},4500);
 }
-(function(){
-  const m=location.hash.match(/#v=([^&]*)&s=([\d:,]+)/); if(!m)return;
-  let name=''; try{name=decodeURIComponent(m[1])}catch(e){}
-  const incoming={};
-  (m[2]||'').split(',').forEach(p=>{const kv=p.split(':');if(kv[0]!==''&&kv[1])incoming[kv[0]]=+kv[1];});
-  if(!name||!Object.keys(incoming).length)return;
-  const b=document.getElementById('shareBanner');
-  b.dataset.keep='1'; b.style.display='';
-  b.innerHTML=esc(name)+' shared their site scores with you. <button class="chip" id="useShared">Save '+esc(name)+'’s scores</button> <button class="chip" id="dropShared">Dismiss</button>';
-  document.getElementById('useShared').onclick=()=>{
-    poll.voters[name]=incoming; poll.current=poll.current||name; savePoll();
-    delete b.dataset.keep; b.style.display='none';
-    history.replaceState(null,'',location.pathname+location.search);
-    renderVoters(); paintStars(); renderBoard(); syncTabs();
-    flash(name+'’s scores saved — flip to “Everyone combined” to see the joint table.');
-  };
-  document.getElementById('dropShared').onclick=()=>{delete b.dataset.keep;b.style.display='none';history.replaceState(null,'',location.pathname+location.search);};
-})();
 renderVoters(); paintStars(); syncTabs(); renderBoard();
+
 </script>
 </body>
 </html>
